@@ -1,6 +1,6 @@
-import { config } from 'dotenv';
-import { Forge, Site } from './forge.js';
-import { createPreview, destroyPreview } from './action.js';
+import {config} from 'dotenv';
+import {Forge, Site} from './forge.js';
+import {createPreview, destroyPreview} from './action.js';
 
 config();
 

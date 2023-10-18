@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { until } from './helpers.js';
+import axios, {AxiosInstance} from 'axios';
+import {until} from './helpers.js';
 
 type ServerPayload = {
   id: number;
@@ -49,7 +49,11 @@ export class Forge {
     return (await this.get(`servers/${server}/sites`)).data.sites;
   }
 
-  static async createSite(server: number, name: string, database: string): Promise<SitePayload> {
+  static async createSite(
+    server: number,
+    name: string,
+    database: string,
+  ): Promise<SitePayload> {
     return (
       await this.post(`servers/${server}/sites`, {
         domain: name,
@@ -93,25 +97,44 @@ export class Forge {
   }
 
   // Not positive this returns a SitePayload
-  static async enableQuickDeploy(server: number, site: number): Promise<SitePayload> {
-    return (await this.post(`servers/${server}/sites/${site}/deployment`)).data.site;
+  static async enableQuickDeploy(
+    server: number,
+    site: number,
+  ): Promise<SitePayload> {
+    return (await this.post(`servers/${server}/sites/${site}/deployment`)).data
+      .site;
   }
 
   static async getDeployScript(server: number, site: number): Promise<string> {
-    return (await this.get(`servers/${server}/sites/${site}/deployment/script`)).data;
+    return (await this.get(`servers/${server}/sites/${site}/deployment/script`))
+      .data;
   }
 
-  static async updateDeployScript(server: number, site: number, content: string): Promise<void> {
-    await this.put(`servers/${server}/sites/${site}/deployment/script`, { content });
+  static async updateDeployScript(
+    server: number,
+    site: number,
+    content: string,
+  ): Promise<void> {
+    await this.put(`servers/${server}/sites/${site}/deployment/script`, {
+      content,
+    });
   }
 
-  static async getEnvironmentFile(server: number, site: number): Promise<string> {
+  static async getEnvironmentFile(
+    server: number,
+    site: number,
+  ): Promise<string> {
     return (await this.get(`servers/${server}/sites/${site}/env`)).data;
   }
 
   // Not positive this returns a SitePayload
-  static async updateEnvironmentFile(server: number, site: number, content: string): Promise<SitePayload> {
-    return (await this.put(`servers/${server}/sites/${site}/env`, { content })).data.site;
+  static async updateEnvironmentFile(
+    server: number,
+    site: number,
+    content: string,
+  ): Promise<SitePayload> {
+    return (await this.put(`servers/${server}/sites/${site}/env`, {content}))
+      .data.site;
   }
 
   static async createScheduledJob(
@@ -138,16 +161,34 @@ export class Forge {
   }
 
   static async deploy(server: number, site: number): Promise<SitePayload> {
-    return (await this.post(`servers/${server}/sites/${site}/deployment/deploy`)).data.site;
+    return (
+      await this.post(`servers/${server}/sites/${site}/deployment/deploy`)
+    ).data.site;
   }
 
-  static async obtainCertificate(server: number, site: number, domain: string): Promise<CertificatePayload> {
-    return (await this.post(`servers/${server}/sites/${site}/certificates/letsencrypt`, { domains: [domain] })).data
-      .certificate;
+  static async obtainCertificate(
+    server: number,
+    site: number,
+    domain: string,
+  ): Promise<CertificatePayload> {
+    return (
+      await this.post(
+        `servers/${server}/sites/${site}/certificates/letsencrypt`,
+        {domains: [domain]},
+      )
+    ).data.certificate;
   }
 
-  static async getCertificate(server: number, site: number, certificate: number): Promise<CertificatePayload> {
-    return (await this.get(`servers/${server}/sites/${site}/certificates/${certificate}`)).data.certificate;
+  static async getCertificate(
+    server: number,
+    site: number,
+    certificate: number,
+  ): Promise<CertificatePayload> {
+    return (
+      await this.get(
+        `servers/${server}/sites/${site}/certificates/${certificate}`,
+      )
+    ).data.certificate;
   }
 
   static setToken(token: string): void {
@@ -160,7 +201,7 @@ export class Forge {
         baseURL: 'https://forge.laravel.com/api/v1/',
         headers: {
           'User-Agent': 'bakerkretzmar/laravel-deploy-preview@v2',
-          'Authorization': `Bearer ${this.#token}`,
+          Authorization: `Bearer ${this.#token}`,
         },
       });
     }
@@ -202,11 +243,13 @@ export class Server {
   }
 
   async loadSites(): Promise<void> {
-    this.sites = (await Forge.listSites(this.id)).map((data) => new Site(data));
+    this.sites = (await Forge.listSites(this.id)).map(data => new Site(data));
   }
 
   async createSite(name: string, database: string): Promise<Site> {
-    const site = new Site(await Forge.createSite(this.id, `${name}.${this.domain}`, database));
+    const site = new Site(
+      await Forge.createSite(this.id, `${name}.${this.domain}`, database),
+    );
     await until(
       () => site.status === 'installed',
       async () => await site.refetch(),
@@ -247,7 +290,9 @@ export class Site {
     );
   }
 
-  async setEnvironmentVariables(variables: Record<string, string>): Promise<void> {
+  async setEnvironmentVariables(
+    variables: Record<string, string>,
+  ): Promise<void> {
     let env = await Forge.getEnvironmentFile(this.server_id, this.id);
     Object.entries(variables).map(([key, value]) => {
       if (new RegExp(`${key}=`).test(env)) {
@@ -260,33 +305,55 @@ export class Site {
   }
 
   async installScheduler(): Promise<void> {
-    await Forge.createScheduledJob(this.server_id, `php /home/forge/${this.name}/artisan schedule:run`);
+    await Forge.createScheduledJob(
+      this.server_id,
+      `php /home/forge/${this.name}/artisan schedule:run`,
+    );
   }
 
   async uninstallScheduler(): Promise<void> {
     const jobs = await Forge.listScheduledJobs(this.server_id);
     await Promise.all(
       jobs
-        .filter((job) => new RegExp(`/home/forge/${this.name}/artisan`).test(job.command))
-        .map(async (job) => await Forge.deleteScheduledJob(this.server_id, job.id)),
+        .filter(job =>
+          new RegExp(`/home/forge/${this.name}/artisan`).test(job.command),
+        )
+        .map(
+          async job => await Forge.deleteScheduledJob(this.server_id, job.id),
+        ),
     );
   }
 
   async appendToDeployScript(append: string): Promise<void> {
     const script = await Forge.getDeployScript(this.server_id, this.id);
     // TODO does this take time to 'install'? If so what do we wait for?
-    await Forge.updateDeployScript(this.server_id, this.id, `${script}\n${append}`);
+    await Forge.updateDeployScript(
+      this.server_id,
+      this.id,
+      `${script}\n${append}`,
+    );
   }
 
   async installCertificate(): Promise<void> {
-    this.certificate_id = (await Forge.obtainCertificate(this.server_id, this.id, this.name)).id;
+    this.certificate_id = (
+      await Forge.obtainCertificate(this.server_id, this.id, this.name)
+    ).id;
   }
 
   async ensureCertificateActivated(): Promise<void> {
-    let certificate = await Forge.getCertificate(this.server_id, this.id, this.certificate_id);
+    let certificate = await Forge.getCertificate(
+      this.server_id,
+      this.id,
+      this.certificate_id,
+    );
     await until(
       () => certificate.active,
-      async () => (certificate = await Forge.getCertificate(this.server_id, this.id, this.certificate_id)),
+      async () =>
+        (certificate = await Forge.getCertificate(
+          this.server_id,
+          this.id,
+          this.certificate_id,
+        )),
     );
   }
 
@@ -305,7 +372,9 @@ export class Site {
   // TODO figure out a way to safely+reliably figure the name out internally so it doesn't need to be passed in
   // Environment file??
   async deleteDatabase(name: string): Promise<void> {
-    const database = (await Forge.listDatabases(this.server_id)).find((db) => db.name === name);
+    const database = (await Forge.listDatabases(this.server_id)).find(
+      db => db.name === name,
+    );
     await Forge.deleteDatabase(this.server_id, database.id);
   }
 

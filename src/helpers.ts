@@ -1,8 +1,12 @@
 function sleep(s: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, s * 1000));
+  return new Promise(r => setTimeout(r, s * 1000));
 }
 
-export async function until(condition: () => boolean, attempt: () => void, pause: number = 1): Promise<void> {
+export async function until(
+  condition: () => boolean,
+  attempt: () => void,
+  pause: number = 1,
+): Promise<void> {
   await attempt();
   while (!condition()) {
     await sleep(pause);

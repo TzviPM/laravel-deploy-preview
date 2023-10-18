@@ -1,9 +1,9 @@
-import { Server } from './forge.js';
+import {Server} from './forge.js';
 
 type CreateConfig = {
   name: string;
   repository: string;
-  servers: Array<{ id: number; domain: string }>;
+  servers: Array<{id: number; domain: string}>;
   afterDeploy?: string;
   environment?: Record<string, string>;
   info?: Function;
@@ -13,7 +13,7 @@ type CreateConfig = {
 
 type DestroyConfig = {
   name: string;
-  servers: Array<{ id: number; domain: string }>;
+  servers: Array<{id: number; domain: string}>;
   info?: Function;
   debug?: Function;
   local?: boolean;
@@ -40,7 +40,7 @@ export async function createPreview({
   await server.loadSites();
 
   debug(`Checking for site named '${name}'`);
-  const extantSite = server.sites.find((site) => site.name === name);
+  const extantSite = server.sites.find(site => site.name === name);
 
   if (extantSite) {
     // re-use existing site
@@ -91,7 +91,7 @@ export async function createPreview({
     debug('Ensuring SSL certificate activated');
     await site.ensureCertificateActivated();
 
-    return { url: `https://${site.name}` };
+    return {url: `https://${site.name}`};
   }
 }
 
@@ -108,7 +108,9 @@ export async function destroyPreview({
   await server.loadSites();
 
   debug(`Checking for site named '${name}'`);
-  const site = server.sites.find((site) => site.name === `${name}.${server.domain}`);
+  const site = server.sites.find(
+    site => site.name === `${name}.${server.domain}`,
+  );
 
   if (site) {
     info('Site exists');

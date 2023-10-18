@@ -6,6 +6,7 @@
   "author": "Jacob Baker-Kretzmar <jacobtbk@gmail.com>",
   "private": true,
   "scripts": {
+    "format": "prettier --write .",
     "debug": "ncc run src/debug.ts",
     "build": "tsc && ncc build --minify --source-map --license licenses.txt"
   },
@@ -20,15 +21,11 @@
     "axios": "^1.5.1",
     "dotenv": "^16.3.1",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "@tzvipm.dev/prettier-config": "^0.0.2"
   },
   "engines": {
     "node": ">=20"
   },
-  "prettier": {
-    "printWidth": 120,
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2
-  }
+  "prettier": "@tzvipm.dev/prettier-config"
 }
